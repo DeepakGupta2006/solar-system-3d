@@ -30,11 +30,6 @@ textures.js    procedural textures
 lib/           local Three.js
 ```
 
-## 🌐 Deploy
-
-Static site with no build step. Import the repo in Vercel
-(Framework: _Other_) or enable GitHub Pages.
-
 ## 📄 License
 
 MIT. Three.js is © its authors (MIT).
