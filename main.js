@@ -559,9 +559,6 @@ function frame() {
   requestAnimationFrame(frame);
 }
 
-// ---------------------------------------------------------------------------
-//  Boot
-// ---------------------------------------------------------------------------
 async function main() {
   const say = (t) => ($('loader-text').textContent = t);
   try {
@@ -576,7 +573,7 @@ async function main() {
     say('Scattering asteroids…'); await tick();
     buildBelt();
     buildUI();
-    // initial placement so the first frame is already correct
+    
     frame();
     $('loader').classList.add('done');
   } catch (err) {
