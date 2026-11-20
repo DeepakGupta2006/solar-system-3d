@@ -1,6 +1,4 @@
-// ---------------------------------------------------------------------------
-//  3D Solar System — Three.js
-// ---------------------------------------------------------------------------
+
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
@@ -13,9 +11,6 @@ const TAU = Math.PI * 2;
 const $ = (id) => document.getElementById(id);
 const tick = () => new Promise((r) => setTimeout(r, 16));
 
-// ---------------------------------------------------------------------------
-//  Planet data (sizes & distances are stylised so everything stays visible)
-// ---------------------------------------------------------------------------
 const SUN_RADIUS = 12;
 
 const PLANETS = [
@@ -56,9 +51,6 @@ const SUN_INFO = {
   fact: 'A glowing ball of hydrogen and helium that fuses 600 million tonnes of hydrogen every second.',
 };
 
-// ---------------------------------------------------------------------------
-//  Renderer / scene / camera / post-processing
-// ---------------------------------------------------------------------------
 const canvas = $('scene');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -88,14 +80,10 @@ const bloom = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.in
 composer.addPass(bloom);
 composer.addPass(new OutputPass());
 
-// Lights: the Sun is a point light with no distance fall-off so outer planets stay readable
 scene.add(new THREE.AmbientLight(0x3a4a77, 0.32));
 const sunLight = new THREE.PointLight(0xfff0dd, 4.6, 0, 0);
 scene.add(sunLight);
 
-// ---------------------------------------------------------------------------
-//  Shaders
-// ---------------------------------------------------------------------------
 const VERT_WORLD = /* glsl */`
   varying vec2 vUv; varying vec3 vN; varying vec3 vW;
   void main() {
@@ -184,10 +172,7 @@ const SUN_FRAG = /* glsl */`
     gl_FragColor = vec4(col * 1.2, 1.0);
   }`;
 
-// ---------------------------------------------------------------------------
-//  World state
-// ---------------------------------------------------------------------------
-const bodies = [];          // { name, data, pivot, mesh, radius, label, spin, omega, ... }
+const bodies = [];          
 const pickables = [];
 const orbitLines = [];
 let belt, sky, stars, sunBody, earthRefs = {};
@@ -205,9 +190,6 @@ function makeAtmosphere(radius, a) {
   );
 }
 
-// ---------------------------------------------------------------------------
-//  Builders
-// ---------------------------------------------------------------------------
 function buildSky() {
   sky = new THREE.Mesh(
     new THREE.SphereGeometry(2500, 64, 32),
@@ -216,7 +198,7 @@ function buildSky() {
   sky.renderOrder = -10;
   scene.add(sky);
 
-  // star field (slowly drifts = "astro motion" of the background)
+ 
   const N = 7000, pos = new Float32Array(N * 3), col = new Float32Array(N * 3);
   const tmp = new THREE.Color();
   for (let i = 0; i < N; i++) {
@@ -236,7 +218,7 @@ function buildSky() {
   }));
   scene.add(stars);
 
-  // spiral galaxy in the upper-left, like the reference picture
+  
   const gal = new THREE.Sprite(new THREE.SpriteMaterial({
     map: galaxyTexture(), blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.9,
   }));
@@ -276,8 +258,8 @@ function buildPlanet(d) {
   orbitGroup.rotation.x = THREE.MathUtils.degToRad(d.incl);
   scene.add(orbitGroup);
 
-  const pivot = new THREE.Group();            // moves along the orbit
-  const tilt = new THREE.Group();             // axial tilt
+  const pivot = new THREE.Group();            
+  const tilt = new THREE.Group();            
   tilt.rotation.z = d.tilt;
   pivot.add(tilt);
   orbitGroup.add(pivot);
@@ -301,7 +283,7 @@ function buildPlanet(d) {
 
   if (d.atmo) tilt.add(makeAtmosphere(d.r, d.atmo));
 
-  // Earth extras: clouds + Moon
+
   let clouds = null, moonPivot = null;
   if (d.maker === 'earth') {
     clouds = new THREE.Mesh(
@@ -316,7 +298,7 @@ function buildPlanet(d) {
       new THREE.SphereGeometry(0.55, 64, 48),
       new THREE.MeshStandardMaterial({ map: mt.map, bumpMap: mt.bump, bumpScale: 1.4, roughness: 1 })
     );
-    moon.position.set(5.0, 0, 0);               // fixed in the pivot ⇒ tidally locked
+    moon.position.set(5.0, 0, 0);             
     moonPivot.rotation.x = 0.09;
     moonPivot.add(moon);
     pivot.add(moonPivot);
@@ -325,7 +307,6 @@ function buildPlanet(d) {
       pivot: moon, mesh: moon, radius: 0.55, isMoon: true, hidden: false });
   }
 
-  // Saturn rings
   if (d.rings) {
     const [ri, ro] = d.rings;
     const rg = new THREE.RingGeometry(ri, ro, 192, 1);
@@ -341,7 +322,7 @@ function buildPlanet(d) {
     tilt.add(ring);
   }
 
-  // orbit line (ellipse with the Sun at one focus)
+  
   const b = d.a * Math.sqrt(1 - d.e * d.e);
   const pts = [];
   for (let i = 0; i <= 360; i++) {
@@ -390,9 +371,6 @@ function buildBelt() {
   scene.add(belt);
 }
 
-// ---------------------------------------------------------------------------
-//  Shooting stars
-// ---------------------------------------------------------------------------
 const shooters = [];
 let nextShooter = 3;
 function spawnShooter() {
@@ -422,9 +400,6 @@ function updateShooters(dt) {
   }
 }
 
-// ---------------------------------------------------------------------------
-//  UI
-// ---------------------------------------------------------------------------
 const labelsEl = $('labels');
 const infoEl = $('info');
 const btnWrap = $('planet-buttons');
@@ -484,7 +459,7 @@ function resetView() {
   controls.minDistance = 3;
 }
 
-// click-to-select (ignore drags)
+
 let downX = 0, downY = 0;
 const ray = new THREE.Raycaster(), mouse = new THREE.Vector2();
 canvas.addEventListener('pointerdown', (e) => { downX = e.clientX; downY = e.clientY; });
@@ -504,9 +479,6 @@ window.addEventListener('resize', () => {
   renderer.setSize(innerWidth, innerHeight); composer.setSize(innerWidth, innerHeight);
 });
 
-// ---------------------------------------------------------------------------
-//  Animation loop
-// ---------------------------------------------------------------------------
 let lastT = performance.now();
 const _t = new THREE.Vector3();
 
