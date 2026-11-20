@@ -1,14 +1,11 @@
-// ---------------------------------------------------------------------------
-//  Procedural textures — every planet surface is generated in code, so the
-//  project needs no image downloads and works completely offline.
-// ---------------------------------------------------------------------------
+
 import * as THREE from 'three';
 
 const TAU = Math.PI * 2;
 let ANISO = 4;
 export function setAnisotropy(n) { ANISO = n; }
 
-// ---------- math helpers ----------
+
 const lerp = (a, b, t) => a + (b - a) * t;
 const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
 const ss = (a, b, x) => { const t = clamp((x - a) / (b - a)); return t * t * (3 - 2 * t); };
@@ -20,7 +17,7 @@ function hash3(x, y, z) {
   return (h >>> 0) / 4294967295;
 }
 
-// 3D value noise (0..1)
+
 function vnoise(x, y, z) {
   const xi = Math.floor(x), yi = Math.floor(y), zi = Math.floor(z);
   let fx = x - xi, fy = y - yi, fz = z - zi;
@@ -35,7 +32,7 @@ function vnoise(x, y, z) {
   return y0 + (y1 - y0) * fz;
 }
 
-// fractal brownian motion (0..1)
+
 function fbm(x, y, z, oct = 5) {
   let a = 1, f = 1, s = 0, n = 0;
   for (let i = 0; i < oct; i++) {
@@ -45,7 +42,7 @@ function fbm(x, y, z, oct = 5) {
   return s / n;
 }
 
-// sum of crater bowls + raised rims. Returns roughly -1 .. +0.4
+
 function craters(x, y, z, density = 0.45) {
   const xi = Math.floor(x), yi = Math.floor(y), zi = Math.floor(z);
   let acc = 0;
